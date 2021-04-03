@@ -1,6 +1,7 @@
 var UserModel  = require('../models/UserModel')
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 
 
 // DB connection
@@ -20,15 +21,17 @@ mongoose.connect(MONGODB_URL, { useNewUrlParser: true, useUnifiedTopology: true 
 	});
 var db = mongoose.connection;
 
-
+const hash = bcrypt.hashSync('password', 10);
 var newUser = new UserModel({
     email: 'admin@admin.com',
     firstName: 'admin',
     lastName: 'admin',
-    password: 'password'
+    password: hash,
+    isConfirmed:true
   });
   newUser.save(function (err, newUser) {
     if (err) throw err;
+   
 
     let userData = {
         _id: newUser._id,
@@ -37,14 +40,6 @@ var newUser = new UserModel({
         email: newUser.email
     };
    
-    const jwtPayload = userData;
-							const jwtData = {
-								expiresIn: process.env.JWT_TIMEOUT_DURATION,
-							};
-							const secret = process.env.JWT_SECRET;
-							//Generated JWT token with Payload and secret.
-							userData.token = jwt.sign(jwtPayload, secret, jwtData);
-
      console.log(userData);                        
   });
   
